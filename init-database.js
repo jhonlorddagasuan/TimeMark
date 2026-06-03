@@ -54,6 +54,58 @@ async function initializeDatabase() {
       )
     `);
     console.log('✅ Tasks table created/verified');
+
+    // Create employees table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS employees (
+        id SERIAL PRIMARY KEY,
+        employee_code VARCHAR(50) UNIQUE NOT NULL,
+        full_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        phone VARCHAR(50),
+        department VARCHAR(100) NOT NULL,
+        position VARCHAR(100) NOT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        avatar_initials VARCHAR(10),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Employees table created/verified');
+
+    // Create attendance records table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS attendance_records (
+        id SERIAL PRIMARY KEY,
+        employee_id INT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        clock_in TIME,
+        clock_out TIME,
+        status VARCHAR(50) DEFAULT 'present',
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (employee_id, date)
+      )
+    `);
+    console.log('✅ Attendance records table created/verified');
+
+    // Create leaves table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS leaves (
+        id SERIAL PRIMARY KEY,
+        employee_id INT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+        leave_type VARCHAR(50) NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        reason TEXT,
+        status VARCHAR(50) DEFAULT 'pending',
+        reviewed_by VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Leaves table created/verified');
     
     console.log('\n✨ Database initialization completed successfully!');
     console.log('\n📊 Database Tables:');
